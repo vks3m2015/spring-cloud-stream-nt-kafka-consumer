@@ -1,0 +1,53 @@
+
+spring:
+  cloud:
+    stream:
+      default:
+        producer:
+          useNativeEncoding: true
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: false
+          consumer-properties:
+            key:
+              deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            value:
+              deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+          producer-properties:
+            key:
+              serializer: org.apache.kafka.common.serialization.StringSerializer
+            value:
+              serializer: org.springframework.kafka.support.serializer.JsonSerializer
+            enable:
+              idempotence: false
+            retries: 3
+          configuration:
+            spring.json.trusted.packages: '*'
+
+        bindings:
+          consumeEvent-in-0:
+            consumer:
+              configuration:
+                spring.json.value.default.type: com.vik.dto.Customer
+                json.value.default.type: com.vik.dto.Customer
+                value.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+                spring.json.trusted.packages: '*'
+              autoCommitOffset: true
+              autoCommitOnError: true
+              startOffset: latest
+
+      bindings:
+        consumeEvent-in-0:
+          destination: test4
+          group: test_grp4
+          consumer:
+            retryable-exceptions:
+              java.lang.IllegalStateException: false
+              java.lang.NullPointerException: false
+            maxAttempts: 3
+            concurrency: 3
+
+    function:
+      definition: consumeEvent;
